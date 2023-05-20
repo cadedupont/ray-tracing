@@ -7,6 +7,7 @@ int main() {
     std::cout << "P3\n" << width << " " << height << "\n255\n";
 
     for (int i = height - 1; i >= 0; --i) {
+        std::cerr << "\rLines Remaining: " << i << ' ' << std::flush;
         for (int j = 0; j < width; ++j) {
             float r = float(j) / float(width - 1);
             float g = float(i) / float(height - 1);
@@ -19,6 +20,8 @@ int main() {
             std::cout << ir << " " << ig << " " << ib << "\n";
         }
     }
+
+    std::cerr << "\nComplete!" << std::endl;
 
     return EXIT_SUCCESS;
 }
