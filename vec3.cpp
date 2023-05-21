@@ -40,7 +40,7 @@ vec3& vec3::operator *=(const float num) {
 // Use the above overloaded operator *= to multiply each element of the current instance's
 // array by the reciprocal of the parameter float
 vec3& vec3::operator /=(const float num) {
-    return *this *= 1/num;
+    return *this *= 1 / num;
 }
 
 // Get coordinates being stored in array
@@ -49,7 +49,7 @@ float vec3::getY() const { return e[1]; }
 float vec3::getZ() const { return e[2]; }
 
 // The length of a vector is defined as the square root of the sum of
-// each element of the array squared. For a vector with 3 dimensions:
+// each element in the array squared. For a vector with 3 dimensions:
 // |x| = sqrt(x^2 + y^2 + z^2)
 float vec3::getLength() const {
     return sqrt(getLengthSquared());
@@ -57,5 +57,7 @@ float vec3::getLength() const {
 
 // Return the sum of each element in the array squared
 float vec3::getLengthSquared() const {
-    return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
+    return e[0] * e[0]
+         + e[1] * e[1]
+         + e[2] * e[2];
 }
