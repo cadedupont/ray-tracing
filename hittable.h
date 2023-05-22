@@ -8,13 +8,11 @@ struct hitRecord {
     position point;
     vec3 normal;
     float num;
-    bool frontFace;
 
-    // If ray has hit front face, set front face to true and normal to outward normal
-    // otherwise, set front face to false and normal to negative outward normal
+    // If dot product of ray direction and outward normal, ray has hit sphere, set normal to outward normal
+    // otherwise, ray hasn't hit sphere, set normal to negative outward normal
     inline void setFaceNormal(const ray& ray, const vec3& outwardNormal) {
-        frontFace = dotProduct(ray.getDirection(), outwardNormal) < 0;
-        normal = frontFace ? outwardNormal : -outwardNormal;
+        normal = dotProduct(ray.getDirection(), outwardNormal) < 0 ? outwardNormal : -outwardNormal;
     }
 };
 
@@ -22,6 +20,10 @@ struct hitRecord {
 // Special thanks if you catch the King Krule reference :)
 class hittable {
     public:
+        // Declare virtual destructor for deleting hittable objects
+        virtual ~hittable() = default;
+
+        // Declare function for checking whether ray has hit hittable object
         virtual bool hasThisHit(const ray& ray, float min, float max, hitRecord& record) const = 0;
 };
 

@@ -1,9 +1,21 @@
 #include "vec3.h"
 #include "color.h"
 #include "ray.h"
+#include "hittable_list.h"
+#include "sphere.h"
 
 #include <iostream>
 
+// Declaring math constants
+const float infinity = std::numeric_limits<float>::infinity();
+const float pi = 3.1415926535897932385f;
+
+// Function for converting degrees to radians
+inline float degreesToRadians(float degrees) {
+    return degrees * pi / 180.0f;
+}
+
+// Function for returning root at which ray hits sphere if it does
 float hitSphere(const position& center, float radius, const ray& ray) {
     // Get vector from ray origin to sphere center
     vec3 oc = ray.getOrigin() - center;
@@ -23,24 +35,20 @@ float hitSphere(const position& center, float radius, const ray& ray) {
     return (discriminant < 0) ? -1 : (-halfB - sqrt(discriminant)) / a;
 }
 
-color rayColor(const ray& ray) {
-    // Get point value of ray hitting sphere
-    float num = hitSphere(position(0.0f, 0.0f, -1.0f), 0.5f, ray);
+// Function for returning color of pixel
+color rayColor(const ray& ray, const hittable& object) {
+    // Declare variable for storing hit record
+    hitRecord record;
 
-    // If ray hits sphere, calculate and return color of sphere at hit point
-    if (num > 0.0f) {
-        vec3 vec = unitVector(ray.getPoint(num) - vec3(0.0f, 0.0f, -1.0f));
-        return 0.5f * color(vec.getX() + 1.0f, vec.getY() + 1.0f, vec.getZ() + 1.0f);
-    }
-    
-    // Get unit vector of ray direction
+    // If ray has hit a hittable object, return color of normal at hit point
+    if (object.hasThisHit(ray, 0.0f, infinity, record))
+        return 0.5f * (record.normal + color(1.0f, 1.0f, 1.0f));
+
+    // Otherwise, return background color of blue to white gradient
     vec3 unitDirection = unitVector(ray.getDirection());
-
-    // Scale y coordinate to range [0, 1]
-    num = 0.5f * (unitDirection.getY() + 1.0f);
-
-    // Linearly blend white and blue depending on y coordinate
+    float num = 0.5f * (unitDirection.getY() + 1.0f);
     return (1.0f - num) * color(1.0f, 1.0f, 1.0f) + num * color(0.5f, 0.7f, 1.0f);
+
 }
 
 int main() {
@@ -48,6 +56,11 @@ int main() {
     const float aspectRatio = 16.0f / 9.0f;
     const int imageWidth = 400;
     const int imageHeight = int(imageWidth / aspectRatio);
+
+    // Create hittable list
+    hittable_list objects;
+    objects.add(new sphere(position(0.0f, 0.0f, -1.0f), 0.5f));
+    objects.add(new sphere(position(0.0f, -100.5f, -1.0f), 100.0f));
 
     // Create viewport dimensions
     const float viewportHeight = 2.0f;
@@ -76,7 +89,7 @@ int main() {
             float v = float(i) / (imageHeight - 1);
 
             // Print color of pixel returned by rayColor function
-            drawColor(std::cout, rayColor(ray(origin, lowerLeftCorner + u * horizontal + v * vertical - origin)));
+            drawColor(std::cout, rayColor(ray(origin, lowerLeftCorner + u * horizontal + v * vertical - origin), objects));
         }
     }
 
