@@ -1,19 +1,8 @@
-#include "vec3.h"
+#include "main.h"
+
 #include "color.h"
-#include "ray.h"
 #include "hittable_list.h"
 #include "sphere.h"
-
-#include <iostream>
-
-// Declaring math constants
-const float infinity = std::numeric_limits<float>::infinity();
-const float pi = 3.1415926535897932385f;
-
-// Function for converting degrees to radians
-inline float degreesToRadians(float degrees) {
-    return degrees * pi / 180.0f;
-}
 
 // Function for returning root at which ray hits sphere if it does
 float hitSphere(const position& center, float radius, const ray& ray) {
@@ -48,7 +37,6 @@ color rayColor(const ray& ray, const hittable& object) {
     vec3 unitDirection = unitVector(ray.getDirection());
     float num = 0.5f * (unitDirection.getY() + 1.0f);
     return (1.0f - num) * color(1.0f, 1.0f, 1.0f) + num * color(0.5f, 0.7f, 1.0f);
-
 }
 
 int main() {
@@ -56,6 +44,10 @@ int main() {
     const float aspectRatio = 16.0f / 9.0f;
     const int imageWidth = 400;
     const int imageHeight = int(imageWidth / aspectRatio);
+    const int samplesPerPixel = 100;
+
+    // Create camera reference
+    camera camera;
 
     // Create hittable list
     hittable_list objects;
@@ -84,12 +76,23 @@ int main() {
 
         // Loop through each pixel in row
         for (int j = 0; j < imageWidth; ++j) {
-            // Get u, v coordinates of pixel
-            float u = float(j) / (imageWidth - 1);
-            float v = float(i) / (imageHeight - 1);
+            // Declare variable for storing color of pixel
+            color pixelColor(0.0f, 0.0f, 0.0f);
 
-            // Print color of pixel returned by rayColor function
-            drawColor(std::cout, rayColor(ray(origin, lowerLeftCorner + u * horizontal + v * vertical - origin), objects));
+            // Loop through each sample in pixel
+            for (int k = 0; k < samplesPerPixel; ++k) {
+                // Get u, v coordinates of pixel
+                float u = (j + randomFloat()) / (imageWidth - 1);
+                float v = (i + randomFloat()) / (imageHeight - 1);
+
+                // Get ray from camera to pixel
+                ray ray = camera.getRay(u, v);
+
+                // Add color of current pixel to pixelColor
+                pixelColor += rayColor(ray, objects);
+            }
+            // Print color of pixel stored in pixelColor scaled by number of samples per pixel
+            drawColor(std::cout, pixelColor, samplesPerPixel);
         }
     }
 
